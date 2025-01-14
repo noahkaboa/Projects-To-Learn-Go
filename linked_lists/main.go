@@ -9,6 +9,8 @@ func main() {
 	list.add("Hello!")
 	list.add("World!")
 
+	fmt.Println(list)
 	fmt.Println("Two elements added")
+	list.print()
 
 }
