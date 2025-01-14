@@ -24,6 +24,22 @@ func (l *List[T]) add(element T) {
 	return
 }
 
+func (l *List[T]) get(index int) T {
+
+	if index < 0 {
+		return nothing[T]()
+	}
+
+	n := l.head
+	for i := 0; i < index; i += 1 {
+		if n.nextNode == nil {
+			return nothing[T]()
+		}
+		n = n.nextNode
+	}
+	return n.value
+}
+
 func (l *List[T]) print() {
 	n := l.head
 	for n.nextNode != nil {
@@ -31,4 +47,9 @@ func (l *List[T]) print() {
 		n = n.nextNode
 	}
 	fmt.Println(n.value)
+}
+
+func nothing[T any]() T {
+	var zero T
+	return zero
 }
