@@ -10,7 +10,6 @@ func main() {
 	list.add("World!")
 
 	fmt.Println("Two elements added")
-	// list.print()
 
 	fmt.Println(list.get(-1))
 

@@ -1,6 +1,6 @@
 # Projects-To-Learn-Go
 
-- [ ] Linked Lists
+- [x] Linked Lists
 - [ ] Graphs
 - [ ] Web Scraper
 - [ ] Grep
