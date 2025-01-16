@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	targetURL := "https://google.com"
+	targetURL := "https://noahkaboa.github.io"
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
@@ -21,7 +21,7 @@ func main() {
 
 	defer resp.Body.Close()
 
-	fmt.Println(bodyBytes)
+	fmt.Println(string(bodyBytes))
 }
 
 func streamBody(rc io.ReadCloser) []byte {
