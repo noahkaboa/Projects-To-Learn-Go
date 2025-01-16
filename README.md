@@ -1,7 +1,7 @@
 # Projects-To-Learn-Go
 
 - [x] Linked Lists
-- [ ] Graphs
+- [x] Graphs
 - [ ] Web Scraper
 - [ ] Grep
 - [ ] Distributed key-value store
