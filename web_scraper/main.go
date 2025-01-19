@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
+
+	"golang.org/x/net/html"
 )
 
 func main() {
 	targetURL := "https://noahkaboa.github.io"
+
+	targetElement := "h1"
 
 	resp, err := http.Get(targetURL)
 	if err != nil {
@@ -22,6 +27,17 @@ func main() {
 	defer resp.Body.Close()
 
 	fmt.Println(string(bodyBytes))
+
+	doc, err := html.Parse(strings.NewReader(string(bodyBytes)))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for n := range doc.Descendants() {
+		if n.Type == html.ElementNode && n.Data == targetElement {
+			fmt.Println(n.FirstChild.Data)
+		}
+	}
 }
 
 func streamBody(rc io.ReadCloser) []byte {
