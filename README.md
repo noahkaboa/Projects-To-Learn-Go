@@ -2,7 +2,7 @@
 
 - [x] Linked Lists
 - [x] Graphs
-- [ ] Web Scraper
+- [x] Web Scraper
 - [ ] Grep
 - [ ] Distributed key-value store
 - [ ] Proxy server?
