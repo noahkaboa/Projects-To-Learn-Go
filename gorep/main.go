@@ -9,7 +9,7 @@ import (
 
 type Result struct {
 	found  bool
-	result string
+	result []string
 }
 
 func main() {
@@ -26,19 +26,31 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("%+v\n", fileCheck(file, term))
+	searchResult := fileCheck(file, term)
+	found := searchResult.found
+	results := searchResult.result
+
+	if found {
+		for i := 0; i < len(results); i++ {
+			fmt.Println(strings.TrimSpace(results[i]))
+		}
+	}
 
 }
 
 func fileCheck(file *os.File, term string) Result {
+
+	endResult := Result{false, []string{}}
+
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, term) {
-			return Result{true, line}
+			endResult.found = true
+			endResult.result = append(endResult.result, line)
 		}
 	}
-	return Result{false, ""}
+	return endResult
 }
 
 func contains(slice []string, term string) bool {
