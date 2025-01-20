@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"strings"
@@ -20,22 +21,24 @@ func main() {
 	filename := os.Args[1]
 	term := os.Args[2]
 
-	data, err := os.ReadFile(filename)
+	file, err := os.Open(filename)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Printf("%+v\n", fileCheck(data, term))
+	fmt.Printf("%+v\n", fileCheck(file, term))
 
 }
 
-func fileCheck(file []byte, term string) Result {
-	fileString := string(file)
-	if strings.Contains(fileString, term) {
-		return Result{found: true, result: term}
-	} else {
-		return Result{found: false, result: ""}
+func fileCheck(file *os.File, term string) Result {
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, term) {
+			return Result{true, line}
+		}
 	}
+	return Result{false, ""}
 }
 
 func contains(slice []string, term string) bool {
