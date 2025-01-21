@@ -39,18 +39,35 @@ func main() {
 }
 
 func fileCheck(file *os.File, term string) Result {
+	counterScanner := bufio.NewScanner(file)
+	jobs := make(chan string)
+	fileLen := 0
+	for counterScanner.Scan() {
+		fileLen++
+		line := counterScanner.Text()
+		go func() {
+			jobs <- line
+		}()
+	}
 
+	results := make(chan string, fileLen)
 	endResult := Result{false, []string{}}
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, term) {
+	for w := 1; w <= 3; w++ {
+		go worker(w, jobs, results, term)
+	}
+
+	for a := 1; a <= fileLen; a++ {
+		r := <-results
+		if r != "" {
 			endResult.found = true
-			endResult.result = append(endResult.result, line)
+			endResult.result = append(endResult.result, r)
 		}
 	}
+	close(jobs)
+
 	return endResult
+
 }
 
 func contains(slice []string, term string) bool {
@@ -60,4 +77,14 @@ func contains(slice []string, term string) bool {
 		}
 	}
 	return false
+}
+
+func worker(id int, jobs <-chan string, results chan<- string, searchTerm string) {
+	for j := range jobs {
+		if strings.Contains(j, searchTerm) {
+			results <- j
+		} else {
+			results <- ""
+		}
+	}
 }
