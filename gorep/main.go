@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -14,19 +15,23 @@ type Result struct {
 
 func main() {
 
-	if contains(os.Args, "--") {
-		os.Args = os.Args[1:]
-	}
+	var filenameFlag, termFlag string
+	var ignoreCaseFlag bool
+	var workerCountFlag int
 
-	filename := os.Args[1]
-	term := os.Args[2]
+	flag.StringVar(&filenameFlag, "f", "", "File that will be searched")
+	flag.StringVar(&termFlag, "t", "", "Term that will be searched for")
+	flag.BoolVar(&ignoreCaseFlag, "i", false, "Ignore case")
+	flag.IntVar(&workerCountFlag, "w", 5, "How many workers in worker pool")
 
-	file, err := os.Open(filename)
+	flag.Parse()
+
+	file, err := os.Open(filenameFlag)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	searchResult := fileCheck(file, term)
+	searchResult := fileCheck(file, termFlag, workerCountFlag)
 	found := searchResult.found
 	results := searchResult.result
 
@@ -38,7 +43,7 @@ func main() {
 
 }
 
-func fileCheck(file *os.File, term string) Result {
+func fileCheck(file *os.File, term string, workerCount int) Result {
 	counterScanner := bufio.NewScanner(file)
 	jobs := make(chan string)
 	fileLen := 0
@@ -53,7 +58,7 @@ func fileCheck(file *os.File, term string) Result {
 	results := make(chan string, fileLen)
 	endResult := Result{false, []string{}}
 
-	for w := 1; w <= 3; w++ {
+	for w := 1; w <= workerCount; w++ {
 		go worker(w, jobs, results, term)
 	}
 
@@ -68,15 +73,6 @@ func fileCheck(file *os.File, term string) Result {
 
 	return endResult
 
-}
-
-func contains(slice []string, term string) bool {
-	for i := 0; i < len(slice); i++ {
-		if slice[i] == term {
-			return true
-		}
-	}
-	return false
 }
 
 func worker(id int, jobs <-chan string, results chan<- string, searchTerm string) {
