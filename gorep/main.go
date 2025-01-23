@@ -15,30 +15,43 @@ type Result struct {
 
 func main() {
 
-	var filenameFlag, termFlag string
+	var filenameFlag, termFlag, dirFlag string
 	var ignoreCaseFlag bool
 	var workerCountFlag int
 
 	flag.StringVar(&filenameFlag, "f", "", "File that will be searched")
 	flag.StringVar(&termFlag, "t", "", "Term that will be searched for")
+	flag.StringVar(&dirFlag, "d", "", "Directory that will be searched")
 	flag.BoolVar(&ignoreCaseFlag, "i", false, "Ignore case")
 	flag.IntVar(&workerCountFlag, "w", 5, "How many workers in worker pool")
 
 	flag.Parse()
 
-	file, err := os.Open(filenameFlag)
-	if err != nil {
-		fmt.Println(err)
+	if filenameFlag == "" && dirFlag == "" {
+		fmt.Println("Need to either provide -f or -d flag")
+		return
 	}
 
-	searchResult := fileCheck(file, termFlag, workerCountFlag)
-	found := searchResult.found
-	results := searchResult.result
-
-	if found {
-		for i := 0; i < len(results); i++ {
-			fmt.Println(strings.TrimSpace(results[i]))
+	if dirFlag == "" {
+		file, err := os.Open(filenameFlag)
+		if err != nil {
+			fmt.Println(err)
 		}
+
+		searchResult := fileCheck(file, termFlag, workerCountFlag)
+		found := searchResult.found
+		results := searchResult.result
+
+		if found {
+			for i := 0; i < len(results); i++ {
+				fmt.Println(strings.TrimSpace(results[i]))
+			}
+		}
+	} else if filenameFlag == "" {
+
+	} else {
+		fmt.Println("Both file and directory provided. Exiting")
+		return
 	}
 
 }
