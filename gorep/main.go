@@ -75,7 +75,7 @@ func fileCheck(file *os.File, term string, workerCount int) Result {
 
 }
 
-func worker(id int, jobs <-chan string, results chan<- string, searchTerm string) {
+func worker(jobs <-chan string, results chan<- string, searchTerm string) {
 	for j := range jobs {
 		if strings.Contains(j, searchTerm) {
 			results <- j
