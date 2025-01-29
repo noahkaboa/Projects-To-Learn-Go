@@ -35,12 +35,7 @@ func main() {
 	}
 
 	if dirFlag == "" {
-		file, err := os.Open(filenameFlag)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		searchResult := fileCheck(file, termFlag, workerCountFlag)
+		searchResult := fileCheck(filenameFlag, termFlag, workerCountFlag)
 		found := searchResult[0].found
 		results := searchResult[0].result
 
@@ -50,12 +45,12 @@ func main() {
 			}
 		}
 	} else if filenameFlag == "" {
-		f, err := os.Open(dirFlag)
+		files, err := os.ReadDir(dirFlag)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		searchResult := dirCheck(f, termFlag, workerCountFlag)
+		searchResult := dirCheck(files, termFlag, workerCountFlag)
 
 		for i := 0; i < len(searchResult); i++ {
 			if searchResult[i].found {
@@ -74,45 +69,27 @@ func main() {
 
 }
 
-func dirCheck(dir *os.File, term string, worker int) []Result {
-	files, err := dir.Readdir(0)
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
+func dirCheck(files []fs.DirEntry, term string, worker int) []Result {
 
 	results := []Result{}
 
 	for _, v := range files {
 		if v.IsDir() {
-			results = append(results, dirCheckFromInfo(v, term, worker)...)
+			results = append(results, dirCheck([]fs.DirEntry{v}, term, worker)...)
 		} else {
-			results = append(results, fileCheckFromInfo(v, term, worker)...)
+			results = append(results, fileCheck(v.Name(), term, worker)...)
 		}
 	}
 
 	return results
 }
 
-func dirCheckFromInfo(dirInfo fs.FileInfo, term string, worker int) []Result {
-	f, err := os.Open(dirInfo.Name())
+func fileCheck(fileName string, term string, workerCount int) []Result {
+	file, err := os.Open(fileName)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
-	return dirCheck(f, term, worker)
-}
-
-func fileCheckFromInfo(fileInfo fs.FileInfo, term string, worker int) []Result {
-	f, err := os.Open(fileInfo.Name())
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	return fileCheck(f, term, worker)
-}
-
-func fileCheck(file *os.File, term string, workerCount int) []Result {
 	counterScanner := bufio.NewScanner(file)
 	jobs := make(chan string)
 	fileLen := 0
@@ -126,7 +103,7 @@ func fileCheck(file *os.File, term string, workerCount int) []Result {
 
 	path, _ := os.Getwd()
 	results := make(chan string, fileLen)
-	endResult := Result{false, []string{}, path + file.Name()}
+	endResult := Result{false, []string{}, path + "\\" + file.Name()}
 
 	for w := 1; w <= workerCount; w++ {
 		go worker(jobs, results, term)
