@@ -61,8 +61,8 @@ func main() {
 			if searchResult[i].found {
 				fmt.Println(searchResult[i].path)
 
-				for i := 0; i < len(searchResult[i].result); i++ {
-					fmt.Println(strings.TrimSpace(searchResult[i].result[i]))
+				for j := 0; j < len(searchResult[i].result); j++ {
+					fmt.Println(strings.TrimSpace(searchResult[i].result[j]))
 				}
 			}
 		}
@@ -81,15 +81,17 @@ func dirCheck(dir *os.File, term string, worker int) []Result {
 		return nil
 	}
 
+	results := []Result{}
+
 	for _, v := range files {
 		if v.IsDir() {
-			dirCheckFromInfo(v, term, worker)
+			results = append(results, dirCheckFromInfo(v, term, worker)...)
 		} else {
-			fileCheckFromInfo(v, term, worker)
+			results = append(results, fileCheckFromInfo(v, term, worker)...)
 		}
 	}
 
-	return nil
+	return results
 }
 
 func dirCheckFromInfo(dirInfo fs.FileInfo, term string, worker int) []Result {
@@ -122,8 +124,9 @@ func fileCheck(file *os.File, term string, workerCount int) []Result {
 		}()
 	}
 
+	path, _ := os.Getwd()
 	results := make(chan string, fileLen)
-	endResult := Result{false, []string{}, file.Name()}
+	endResult := Result{false, []string{}, path + file.Name()}
 
 	for w := 1; w <= workerCount; w++ {
 		go worker(jobs, results, term)
