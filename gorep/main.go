@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -50,7 +51,7 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		searchResult := dirCheck(files, termFlag, workerCountFlag)
+		searchResult := dirCheck(files, termFlag, workerCountFlag, dirFlag)
 
 		for i := 0; i < len(searchResult); i++ {
 			if searchResult[i].found {
@@ -69,15 +70,15 @@ func main() {
 
 }
 
-func dirCheck(files []fs.DirEntry, term string, worker int) []Result {
+func dirCheck(files []fs.DirEntry, term string, worker int, dirpath string) []Result {
 
 	results := []Result{}
 
 	for _, v := range files {
 		if v.IsDir() {
-			results = append(results, dirCheck([]fs.DirEntry{v}, term, worker)...)
+			results = append(results, dirCheck([]fs.DirEntry{v}, term, worker, dirpath)...)
 		} else {
-			results = append(results, fileCheck(v.Name(), term, worker)...)
+			results = append(results, fileCheck(filepath.Join(dirpath, v.Name()), term, worker)...)
 		}
 	}
 
@@ -90,6 +91,7 @@ func fileCheck(fileName string, term string, workerCount int) []Result {
 		fmt.Println(err)
 		return nil
 	}
+	defer file.Close()
 	counterScanner := bufio.NewScanner(file)
 	jobs := make(chan string)
 	fileLen := 0
